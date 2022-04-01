@@ -28,9 +28,9 @@ export class ProductsService {
     return this.productRepository.find();
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
     // const product = this.products.find((item) => item.id === id);
-    const product = this.productRepository.findOne(id);
+    const product = await this.productRepository.findOne(id);
     if (!product) {
       throw new NotFoundException(`Product #${id} not found`);
     }
@@ -38,32 +38,26 @@ export class ProductsService {
     return product;
   }
 
-  // create(data: CreateProductDto) {
-  //   this.counterId = this.counterId + 1;
-  //   const newProduct = {
-  //     id: this.counterId,
-  //     ...data,
-  //   };
-  //   this.products.push(newProduct);
-  //   return newProduct;
-  // }
+  create(data: CreateProductDto) {
+    // const newProduct = new Product();
+    // newProduct.image = data.image;
+    // newProduct.name = data.name;
+    // newProduct.description = data.description;
+    // newProduct.price = data.price;
+    // newProduct.stock = data.stock;
+    // newProduct.image = data.image;
+    const newProduct = this.productRepository.create(data);
+    return this.productRepository.save(newProduct);
+  }
 
-  // update(id: number, changes: UpdateProductDto) {
-  //   const product = this.findOne(id);
-  //   const index = this.products.findIndex((item) => item.id === id);
-  //   this.products[index] = {
-  //     ...product,
-  //     ...changes,
-  //   };
-  //   return this.products[index];
-  // }
+  async update(id: number, changes: UpdateProductDto) {
+    const product = await this.productRepository.findOne(id);
+    this.productRepository.merge(product, changes);
 
-  // remove(id: number) {
-  //   const index = this.products.findIndex((item) => item.id === id);
-  //   if (index === -1) {
-  //     throw new NotFoundException(`Product #${id} not found`);
-  //   }
-  //   this.products.splice(index, 1);
-  //   return true;
-  // }
+    return this.productRepository.save(product);
+  }
+
+  remove(id: number) {
+    return this.productRepository.delete(id);
+  }
 }
