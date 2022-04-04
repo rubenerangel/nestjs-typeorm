@@ -1,13 +1,13 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Client } from 'pg';
 
 import { User } from '../entities/user.entity';
-import { Order } from '../entities/order.entity';
 import { CreateUserDto, UpdateUserDto } from '../dtos/user.dto';
 import { ProductsService } from './../../products/services/products.service';
+import { CustomersService } from './customers.service';
 
 @Injectable()
 export class UsersService {
@@ -16,17 +16,18 @@ export class UsersService {
     private configService: ConfigService,
     @Inject('PG') private clientPg: Client,
     @InjectRepository(User) private userRepository: Repository<User>,
+    private customersService: CustomersService,
   ) {}
 
-  private counterId = 1;
-  private users: User[] = [
-    {
-      id: 1,
-      email: 'correo@mail.com',
-      password: '12345',
-      role: 'admin',
-    },
-  ];
+  // private counterId = 1;
+  // private users: User[] = [
+  //   {
+  //     id: 1,
+  //     email: 'correo@mail.com',
+  //     password: '12345',
+  //     role: 'admin',
+  //   },
+  // ];
 
   async findAll() {
     // const apiKey = this.configService.get('API_KEY');
@@ -34,7 +35,9 @@ export class UsersService {
     // console.log(apiKey, dbName);
     // return this.users;
 
-    return this.userRepository.find();
+    return this.userRepository.find({
+      relations: ['customer'],
+    });
   }
 
   async findOne(id: number) {
@@ -42,7 +45,7 @@ export class UsersService {
     // if (!user) {
     //   throw new NotFoundException(`User #${id} not found`);
     // }
-    return await this.userRepository.findOne();
+    return await this.userRepository.findOne(id);
   }
 
   async create(data: CreateUserDto) {
@@ -53,6 +56,11 @@ export class UsersService {
     // };
     // this.users.push(newUser);
     const newUser = this.userRepository.create(data);
+
+    if (data.customerId) {
+      const customer = await this.customersService.findOne(data.customerId);
+      newUser.customer = customer;
+    }
 
     return this.userRepository.save(newUser);
   }

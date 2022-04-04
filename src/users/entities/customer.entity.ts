@@ -1,7 +1,8 @@
 import {
   Entity,
   Column,
-  PrimaryColumn,
+  // PrimaryColumn,
+  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
   OneToOne,
@@ -10,7 +11,8 @@ import { User } from './user.entity';
 
 @Entity()
 export class Customer {
-  @PrimaryColumn()
+  // @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: number;
   @Column({ type: 'varchar', length: 255 })
   name: string;
