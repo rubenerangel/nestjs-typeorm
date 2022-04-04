@@ -36,7 +36,7 @@ export class ProductsService {
   findAll() {
     // return this.products;
     return this.productRepository.find({
-      relations: ['brand'],
+      relations: ['brand', 'categories'],
     });
   }
 
@@ -94,6 +94,35 @@ export class ProductsService {
       const brand = await this.brandRepository.findOne(changes.brandId);
       product.brand = brand;
     }
+
+    if (changes.categoriesIds) {
+      const categories = await this.categoryRepository.findByIds(
+        changes.categoriesIds,
+      );
+      product.categories = categories;
+    }
+
+    return this.productRepository.save(product);
+  }
+
+  async removeCategoryProduct(productId: number, categoryId: number) {
+    const product = await this.productRepository.findOne(productId, {
+      relations: ['categories'],
+    });
+    product.categories = product.categories.filter(
+      (item) => item.id !== categoryId,
+    );
+
+    return this.productRepository.save(product);
+  }
+
+  async addCategoryProduct(productId: number, categoryId: number) {
+    const product = await this.productRepository.findOne(productId, {
+      relations: ['categories'],
+    });
+
+    const category = await this.categoryRepository.findOne(categoryId);
+    product.categories.push(category);
 
     return this.productRepository.save(product);
   }
