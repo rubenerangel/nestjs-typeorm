@@ -8,13 +8,17 @@ import { Repository } from 'typeorm';
 
 import { Product } from './../entities/product.entity';
 import { CreateProductDto, UpdateProductDto } from './../dtos/products.dtos';
-import { BrandsService } from './brands.service';
+import { Category } from '../entities/category.entity';
+import { Brand } from '../entities/brand.entity';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectRepository(Product) private productRepository: Repository<Product>,
-    private brandsService: BrandsService,
+    @InjectRepository(Brand) private brandRepository: Repository<Brand>,
+    // private brandsService: BrandsService,
+    @InjectRepository(Category)
+    private categoryRepository: Repository<Category>,
   ) {}
 
   // private counterId = 1;
@@ -38,7 +42,9 @@ export class ProductsService {
 
   async findOne(id: number) {
     // const product = this.products.find((item) => item.id === id);
-    const product = await this.productRepository.findOne(id);
+    const product = await this.productRepository.findOne(id, {
+      relations: ['brand', 'categories'],
+    });
     if (!product) {
       throw new NotFoundException(`Product #${id} not found`);
     }
@@ -57,8 +63,15 @@ export class ProductsService {
     const newProduct = this.productRepository.create(data);
 
     if (data.brandId) {
-      const brand = await this.brandsService.findOne(data.brandId);
+      const brand = await this.brandRepository.findOne(data.brandId);
       newProduct.brand = brand;
+    }
+
+    if (data.categoriesIds) {
+      const categories = await this.categoryRepository.findByIds(
+        data.categoriesIds,
+      );
+      newProduct.categories = categories;
     }
 
     return this.productRepository
@@ -78,7 +91,7 @@ export class ProductsService {
     this.productRepository.merge(product, changes);
 
     if (changes.brandId) {
-      const brand = await this.brandsService.findOne(changes.brandId);
+      const brand = await this.brandRepository.findOne(changes.brandId);
       product.brand = brand;
     }
 
