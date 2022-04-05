@@ -7,16 +7,12 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Customer } from './customer.entity';
-import { OrderItem } from './order-product.entity';
+import { OrderItem } from './order-item.entity';
 
 @Entity()
 export class Order {
   @PrimaryGeneratedColumn()
   id: number;
-
-  // date: Date;
-  // user: User;
-  // products: Product[];
 
   @CreateDateColumn({
     type: 'timestamptz',

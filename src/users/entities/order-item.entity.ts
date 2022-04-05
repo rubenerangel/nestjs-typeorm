@@ -31,7 +31,7 @@ export class OrderItem {
   updatedAt: Date;
 
   @Column({ type: 'int' })
-  cuantity: number;
+  quantity: number;
 
   @ManyToOne(() => Product)
   product: Product;
