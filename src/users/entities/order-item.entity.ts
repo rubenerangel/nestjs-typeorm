@@ -6,6 +6,8 @@ import {
   UpdateDateColumn,
   ManyToOne,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
+
 import { Product } from '../../products/entities/product.entity';
 import { Order } from './order.entity';
 
@@ -17,13 +19,14 @@ export class OrderItem {
   // date: Date;
   // user: User;
   // products: Product[];
-
+  @Exclude()
   @CreateDateColumn({
     type: 'timestamptz',
     default: () => 'CURRENT_TIMESTAMP',
   })
   createdAt: Date;
 
+  @Exclude()
   @UpdateDateColumn({
     type: 'timestamptz',
     default: () => 'CURRENT_TIMESTAMP',
